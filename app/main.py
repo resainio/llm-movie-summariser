@@ -3,13 +3,12 @@ from app.summarisation import init_pipeline, generate_summary
 from app.models import MovieReview, MovieSummary
 import logging
 
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
-
 logger.info("Starting API and initializing the summarisation pipeline")
-summarisation_pipeline = init_pipeline(model_name)
+summarisation_pipeline = init_pipeline("TinyLlama/TinyLlama-1.1B-Chat-v1.0")
 
 app = FastAPI(
     title="Movie Review Summarisation API",
@@ -34,4 +33,3 @@ def movie_summary(movie_review: MovieReview):
     except Exception as e:
         logger.error(f"Error occurred: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
-
