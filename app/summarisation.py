@@ -1,6 +1,5 @@
 from transformers import pipeline
 import logging
-import json
 import re
 
 logging.basicConfig(level=logging.INFO)
@@ -17,58 +16,61 @@ def init_pipeline(model_name: str):
         logger.error(f"Error initializing pipeline: {str(e)}")
         raise RuntimeError(f"Failed to initialize pipeline: {str(e)}")
 
-def parse_json(generated_text: str) -> dict:
-    """Parse JSON output."""
-    # Extract JSON using regex
-    json_match = re.search(r"\{.*\}", generated_text, re.DOTALL)
-    if not json_match:
-        raise ValueError("Model output did not contain valid JSON.")
-    json_text = json_match.group(0)
+def parse_summary(generated_text: str) -> str:
+    """Parse the summary from the model's output."""
+    # Define a regex to extract text following <|assistant|>
+    summary_pattern = r"<\|assistant\|>\s*(.*)"
+    match = re.search(summary_pattern, generated_text, re.DOTALL)
 
-    try:
-        output = json.loads(json_text)
-    except Exception as e:
-        raise ValueError(f"Failed to parse JSON: {json_text}. Error: {str(e)}")
-    return output
+    if match:
+        # Return the summary text
+        return match.group(1).strip()
+    else:
+        # If no match, log and raise an error
+        logger.error("Failed to parse the summary from the model output.")
+        raise ValueError("Failed to parse summary from model output.")
 
 def generate_summary(summarisation_pipeline, review_text: str) -> dict:
-    """Generate a summary for an input string using the summarisation pipeline."""
-    # Construct the prompt
-    prompt = (
-        "Your task is to extract specific information from the given review and present it in valid JSON format.\n"
-        "Extract the following information:\n"
-        "1. title: A concise title of the review (string).\n"
-        "2. summary: A short summary of the review in 2-3 sentences (string).\n"
-        "3. grade: A grade for the movie between 0 and 5 (integer).\n"
-        "The output must strictly follow this JSON format:\n"
-        '{\n'
-        '  "title": "Title of the summary",\n'
-        '  "summary": "This is the summary of the review.",\n'
-        '  "grade": 4\n'
-        '}\n\n'
-        f"Review: {review_text}\n\n"
-        "Output only the JSON object, with no extra text or comments."
-    )
+    """Generate a summary for a given movie review using the summarisation pipeline."""
+    # Define the system-level instruction
+    system_prompt = "You are a helpful assistant tasked with writing concise summaries of movie reviews."
 
-    # Generate text
-    results = summarisation_pipeline(prompt, max_length=500, temperature=0.2, top_p=0.9, do_sample=True)
-    generated_text = results[0]["generated_text"]
+    # Define the user-specific prompt
+    prompt = f"Please summarise the following movie review in exactly 2-3 sentences:\n\nReview: {review_text} "
 
-    # Parse the JSON
+    # Combine into the formatted prompt
+    formatted_prompt = f"<|system|>\n{system_prompt}</s>\n<|user|>\n{prompt}</s>\n<|assistant|>"
+
     try:
-        output = parse_json(generated_text)
-    except ValueError as e:
-        raise ValueError(f"Model output error: {str(e)}")
+        # Generate response
+        logger.info("Sending prompt to the model...")
 
-    # Validate the parsed output
-    required_fields = ["title", "summary", "grade"]
-    for field in required_fields:
-        if field not in output:
-            raise ValueError(f"Missing required field: {field}")
+        results = summarisation_pipeline(
+            formatted_prompt,
+            do_sample=True,
+            top_k=50,
+            top_p=0.6,
+            temperature=0.1,
+            num_return_sequences=1,
+            repetition_penalty=1.2,
+            max_new_tokens=150,
+        )
+        generated_text = results[0]["generated_text"].strip()
 
-    # Validate the grade
-    if not isinstance(output["grade"], int) or not (0 <= output["grade"] <= 5):
-        raise ValueError("Grade must be an integer between 0 and 5.")
+        # Log the raw model output
+        logger.info(f"Raw model output:\n{generated_text}")
 
-    return output
+        # Parse the relevant part of the output
+        summary = parse_summary(generated_text)
+
+        # Return the summary with hardcoded fields
+        return {
+            "title": "Review Title",  # default
+            "summary": summary,
+            "grade": 4,  # default
+        }
+    except Exception as e:
+        logger.error(f"Unexpected error: {str(e)}")
+        raise RuntimeError("Unexpected error during summary generation.")
+
    
