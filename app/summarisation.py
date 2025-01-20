@@ -36,7 +36,7 @@ def generate_summary(summarisation_pipeline, review_text: str) -> dict:
     system_prompt = "You are a helpful assistant tasked with writing concise summaries of movie reviews."
 
     # Define the user-specific prompt
-    prompt = f"Please summarise the following movie review in exactly 2-3 sentences:\n\nReview: {review_text} "
+    prompt = f"Please summarise the following movie review in exactly 2-3 sentences. Do not include conclusions. Review: {review_text} "
 
     # Combine into the formatted prompt
     formatted_prompt = f"<|system|>\n{system_prompt}</s>\n<|user|>\n{prompt}</s>\n<|assistant|>"
