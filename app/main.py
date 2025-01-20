@@ -35,6 +35,3 @@ def movie_summary(movie_review: MovieReview):
         logger.error(f"Error occurred: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
-
-if __name__ == "__main__":
-    main()
