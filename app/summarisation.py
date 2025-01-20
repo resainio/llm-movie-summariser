@@ -58,7 +58,7 @@ def extract_output(generated_text: str) -> dict:
 def generate_summary(summarisation_pipeline, review_text: str) -> dict:
     """Generate a summary for a given movie review using the summarisation pipeline."""
     # Define the system-level instruction
-    system_prompt = "You are a helpful assistant tasked with writing concise summaries of movie reviews."
+    system_prompt = "You are a helpful assistant tasked with writing short summaries of movie reviews."
     
     # Include few-shot prompting
     few_shot_prompt = """
@@ -75,9 +75,9 @@ def generate_summary(summarisation_pipeline, review_text: str) -> dict:
     
     # Define the user-specific prompt
     prompt = (
-        f"Give a concise title for the following movie review. "
-        f"Assign a grade for the movie between 0 and 5 based on the review content. "
-        f"Summarise the following movie review in exactly 2-3 sentences. "
+        f"Give a concise title for the following movie review capturing the essence of the review. "
+        f"Assign a grade for the movie between 0 and 5 based on the following review content. "
+        f"Summarise the following movie review in exactly 2-3 sentences, focusing only on the main points. "
         f"Review: {review_text}"
     )
     # Combine into the formatted prompt
@@ -91,10 +91,10 @@ def generate_summary(summarisation_pipeline, review_text: str) -> dict:
             do_sample=True,
             top_k=50,
             top_p=0.6,
-            temperature=0.2,
+            temperature=0.1,
             num_return_sequences=1,
             repetition_penalty=1.2,
-            max_new_tokens=150,
+            max_new_tokens=100,
         )
         generated_text = results[0]["generated_text"].strip()
 
