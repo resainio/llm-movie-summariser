@@ -75,9 +75,9 @@ def generate_summary(summarisation_pipeline, review_text: str) -> dict:
     
     # Define the user-specific prompt
     prompt = (
-        f"Please extract a concise title for the review that captures the essence of the review. "
-        f"Please summarise the following movie review in exactly 2-3 sentences. "
-        f"Also, assign a grade for the movie between 0 and 5 based on the review content. "
+        f"Give a concise title for the following movie review. "
+        f"Assign a grade for the movie between 0 and 5 based on the review content. "
+        f"Summarise the following movie review in exactly 2-3 sentences. "
         f"Review: {review_text}"
     )
     # Combine into the formatted prompt
@@ -85,7 +85,7 @@ def generate_summary(summarisation_pipeline, review_text: str) -> dict:
 
     try:
         # Generate response
-        logger.info("Sending prompt to the model...")
+        logger.info("Sending prompt to the model.")
         results = summarisation_pipeline(
             formatted_prompt,
             do_sample=True,
