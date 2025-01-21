@@ -4,12 +4,13 @@ It's purpose is to generate the following fields for a given review:
 1. A **Title** for the review.
 2. A short **Summary** for the review.
 3. A **Grade** between 0 and 5 based on the review content.
+4. The **Reviewer** of the movie review.
 
 # Input Format
 The API expects a JSON object with the following fields:
 
-review: The text of the movie review to be summarised as string. 
-reviewer: The name or identifier of the reviewer as string. 
+1. **review**: the text of the movie review to be summarised as string. 
+2. **reviewer**: for the name or identifier of the reviewer as string. 
 
 ## Requirements
 Make sure you have **Docker** installed to build and run the API.
@@ -21,7 +22,7 @@ Make sure you have **Docker** installed to build and run the API.
 2. Run the Docker container:
    ```docker run -d --name moviecontainer -p 8000:8000 movie-summary-api```
 
-3. The API will be available at:
+3. The API will be available at
     Swagger UI: http://localhost:8000/docs
 
 ## Test the API
